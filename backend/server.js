@@ -7,7 +7,6 @@ import multer from 'multer';
 import morgan from 'morgan';
 import connectDB from './config/db.js';
 import menuRoutes from './routes/menuRoutes.js';
-import reservationRoutes from './routes/reservationRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
@@ -40,7 +39,6 @@ app.use('/api/menu', (req, res, next) => {
 }, menuRoutes);
 
 app.use('/api/orders', orderRoutes);
-app.use('/api/reservations', reservationRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/cart', cartRoutes);
 
