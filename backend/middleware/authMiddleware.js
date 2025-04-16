@@ -28,10 +28,10 @@ export const adminOnly = (req, res, next) => {
   }
 };
 
-export const staffOrAdmin = (req, res, next) => {
-  if (req.user && (req.user.role === 'admin' || req.user.role === 'staff')) {
-    next();
-  } else {
-    res.status(403).json({ message: 'Not authorized, staff or admin only' });
-  }
-};
+// export const staffOrAdmin = (req, res, next) => {
+//   if (req.user && (req.user.role === 'admin' || req.user.role === 'staff')) {
+//     next();
+//   } else {
+//     res.status(403).json({ message: 'Not authorized, staff or admin only' });
+//   }
+// };
