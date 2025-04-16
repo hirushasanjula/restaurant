@@ -21,6 +21,10 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'Welcome to the Culinary Backend API' });
+});
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
