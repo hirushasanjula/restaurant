@@ -1,7 +1,7 @@
-// src/pages/Auth.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { loginUser, registerUser } from '../api/api';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext '; 
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, ChevronRight, ArrowRight, Coffee } from 'lucide-react';
 
@@ -10,7 +10,8 @@ const Auth = () => {
   const [formData, setFormData] = useState({ email: '', password: '', name: '' });
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, pendingCartItem, setPendingCartItem } = useAuth();
+  const { addToCart } = useCart(); 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -21,7 +22,12 @@ const Auth = () => {
     try {
       if (isLogin) {
         await login({ email: formData.email, password: formData.password });
-        navigate('/');
+        // After login, check for pending cart item
+        if (pendingCartItem) {
+          addToCart(pendingCartItem);
+          setPendingCartItem(null); // Clear the pending item
+        }
+        navigate('/cart'); // Redirect to cart page after login
       } else {
         const response = await registerUser({
           name: formData.name,
@@ -30,7 +36,12 @@ const Auth = () => {
           role: 'user',
         });
         await login({ email: formData.email, password: formData.password });
-        navigate('/');
+        // After registration and login, check for pending cart item
+        if (pendingCartItem) {
+          addToCart(pendingCartItem);
+          setPendingCartItem(null);
+        }
+        navigate('/cart');
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Authentication failed');
@@ -42,7 +53,6 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-amber-50 py-12 sm:py-16 md:py-20 px-4">
-      {/* Header with Logo/Title */}
       <div className="max-w-md mx-auto text-center mb-8">
         <Link to="/" className="inline-block mb-3">
           <Coffee size={36} className="text-amber-600 mx-auto" />
@@ -55,10 +65,8 @@ const Auth = () => {
         </p>
       </div>
 
-      {/* Auth Card */}
       <div className="max-w-md mx-auto">
         <div className="bg-white rounded-xl shadow-xl overflow-hidden">
-          {/* Tab Navigation */}
           <div className="flex border-b border-amber-100">
             <button
               onClick={() => setIsLogin(true)}
@@ -78,7 +86,6 @@ const Auth = () => {
             </button>
           </div>
 
-          {/* Form Content */}
           <div className="p-6 sm:p-8">
             {error && (
               <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
@@ -87,7 +94,6 @@ const Auth = () => {
             )}
 
             <form onSubmit={handleSubmit}>
-              {/* Name Field - Only shown for registration */}
               {!isLogin && (
                 <div className="mb-5">
                   <label htmlFor="name" className="block text-amber-800 text-sm font-medium mb-2">
@@ -110,7 +116,6 @@ const Auth = () => {
                 </div>
               )}
 
-              {/* Email Field */}
               <div className="mb-5">
                 <label htmlFor="email" className="block text-amber-800 text-sm font-medium mb-2">
                   Email Address
@@ -131,7 +136,6 @@ const Auth = () => {
                 </div>
               </div>
 
-              {/* Password Field */}
               <div className="mb-5">
                 <label htmlFor="password" className="block text-amber-800 text-sm font-medium mb-2">
                   Password
@@ -158,7 +162,6 @@ const Auth = () => {
                 )}
               </div>
 
-              {/* Remember Me & Forgot Password row - Only for login */}
               {isLogin && (
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center">
@@ -179,7 +182,6 @@ const Auth = () => {
                 </div>
               )}
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isLoading}
@@ -197,7 +199,6 @@ const Auth = () => {
                 )}
               </button>
 
-              {/* Social Login Section */}
               <div className="mt-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
@@ -242,7 +243,6 @@ const Auth = () => {
           </div>
         </div>
 
-        {/* Footer Links */}
         <div className="text-center mt-8">
           <p className="text-sm text-amber-700">
             By signing {isLogin ? 'in' : 'up'}, you agree to our{' '}
@@ -257,7 +257,6 @@ const Auth = () => {
         </div>
       </div>
 
-      {/* Return to Homepage Link */}
       <div className="max-w-md mx-auto mt-8 text-center">
         <Link to="/" className="inline-flex items-center text-amber-600 hover:text-amber-800">
           <ChevronRight size={16} className="transform rotate-180" />

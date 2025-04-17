@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { X, Heart, MinusCircle, PlusCircle, ShoppingBag, ChevronDown, Check } from 'lucide-react';
 import { useCart } from '../../context/CartContext ';
+import { useAuth } from '../../context/AuthContext'; 
+import { useNavigate } from 'react-router-dom'; 
 
 const MenuItemSidebar = ({ selectedItem, onClose }) => {
-  const { addToCart } = useCart(); // Use cart context for adding items
+  const { addToCart } = useCart();
+  const { user, setPendingCartItem } = useAuth(); // Get user and setPendingCartItem from AuthContext
+  const navigate = useNavigate(); // For redirecting
   const [quantity, setQuantity] = useState(1);
   const [customizations, setCustomizations] = useState([]);
   const [showIngredients, setShowIngredients] = useState(false);
@@ -11,7 +15,6 @@ const MenuItemSidebar = ({ selectedItem, onClose }) => {
 
   if (!selectedItem) return null;
 
-  // Category-specific customization options with price modifiers
   const customizationOptions = {
     appetizer: [
       { name: 'Extra Dip', price: 0.75 },
@@ -51,10 +54,8 @@ const MenuItemSidebar = ({ selectedItem, onClose }) => {
     ],
   };
 
-  // Select customization options based on item's category
   const availableCustomizations = customizationOptions[selectedItem.category] || [];
 
-  // Calculate total price: base price * quantity + sum of customization prices
   const calculateTotalPrice = () => {
     const basePrice = selectedItem.price;
     const customizationCost = customizations.reduce((sum, option) => {
@@ -64,7 +65,6 @@ const MenuItemSidebar = ({ selectedItem, onClose }) => {
     return (basePrice + customizationCost) * quantity;
   };
 
-  // Sample ingredients (category-specific)
   const ingredients = {
     appetizer: ['Tomatoes', 'Cheese', 'Herbs', 'Bread'],
     main: ['Beef', 'Potatoes', 'Vegetables', 'Sauce'],
@@ -88,27 +88,29 @@ const MenuItemSidebar = ({ selectedItem, onClose }) => {
   const decrementQuantity = () => setQuantity(prev => Math.max(1, prev - 1));
 
   const handleAddToCart = () => {
-    // Create the cart item with all necessary details
     const cartItem = {
       ...selectedItem,
       quantity,
       customizations,
       totalPrice: calculateTotalPrice(),
     };
-    
-    // Add to cart using context method
-    addToCart(cartItem);
-    
-    // Close the sidebar after adding to cart
-    onClose();
+
+    // Check if user is logged in
+    if (!user) {
+      // If not logged in, store the cart item in AuthContext and redirect to login
+      setPendingCartItem(cartItem);
+      navigate('/auth');
+    } else {
+      // If logged in, add to cart directly
+      addToCart(cartItem);
+      onClose();
+    }
   };
 
   const toggleFavorite = () => setIsFavorite(!isFavorite);
 
   return (
-    // The sidebar - removed the overlay that was hiding the background
     <div className="fixed top-0 right-0 h-full w-64 sm:w-80 z-50 bg-white shadow-lg border-l border-amber-200 flex flex-col overflow-hidden">
-      {/* Close button */}
       <button
         onClick={onClose}
         className="absolute top-4 right-4 bg-white shadow-md hover:bg-gray-100 p-2 rounded-full transition-colors z-50"
@@ -116,7 +118,6 @@ const MenuItemSidebar = ({ selectedItem, onClose }) => {
         <X size={18} className="text-amber-900" />
       </button>
       
-      {/* Header */}
       <div className="relative h-40 overflow-hidden">
         {selectedItem.image ? (
           <img
@@ -148,7 +149,6 @@ const MenuItemSidebar = ({ selectedItem, onClose }) => {
           </div>
         </div>
         
-        {/* Favorite button */}
         <button
           onClick={toggleFavorite}
           className={`absolute top-4 left-4 ${isFavorite ? 'bg-red-500' : 'bg-white/80 hover:bg-white'} p-1.5 rounded-full transition-colors`}
@@ -161,9 +161,7 @@ const MenuItemSidebar = ({ selectedItem, onClose }) => {
         </button>
       </div>
 
-      {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto p-4">
-        {/* Price and availability */}
         <div className="flex justify-between items-center mb-4">
           <div className="text-xl font-bold text-amber-600">${calculateTotalPrice().toFixed(2)}</div>
           <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -175,13 +173,11 @@ const MenuItemSidebar = ({ selectedItem, onClose }) => {
           </div>
         </div>
         
-        {/* Description */}
         <div className="mb-4">
           <h3 className="text-sm font-semibold text-amber-900 mb-1">Description</h3>
           <p className="text-sm text-amber-700">{selectedItem.description}</p>
         </div>
         
-        {/* Ingredients */}
         <div className="mb-4">
           <button 
             className="flex justify-between items-center w-full text-left mb-1"
@@ -206,7 +202,6 @@ const MenuItemSidebar = ({ selectedItem, onClose }) => {
           )}
         </div>
         
-        {/* Customizations */}
         {availableCustomizations.length > 0 && (
           <div className="mb-4">
             <h3 className="text-sm font-semibold text-amber-900 mb-2">Customize Your Order</h3>
@@ -238,7 +233,6 @@ const MenuItemSidebar = ({ selectedItem, onClose }) => {
         )}
       </div>
 
-      {/* Footer with add to cart - fixed at bottom on mobile */}
       <div className="border-t border-amber-100 p-4 bg-white">
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm text-amber-900 font-medium">Quantity</span>

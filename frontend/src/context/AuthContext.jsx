@@ -6,52 +6,44 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [pendingCartItem, setPendingCartItem] = useState(null); // New state for pending cart item
 
   useEffect(() => {
-    const checkUser = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const response = await getUserProfile();
-          setUser(response.data);
-        } catch (error) {
-          console.error('Profile fetch error:', error);
-          localStorage.removeItem('token');
-        }
-      }
-      setLoading(false);
-    };
-    checkUser();
-  }, []);
+    if (token) {
+      fetchUser();
+    }
+  }, [token]);
 
-  const login = async (credentials) => {
+  const fetchUser = async () => {
     try {
-      const response = await loginUser(credentials); // Line ~28
-      localStorage.setItem('token', response.data.token);
-      setUser(response.data.user);
-      return response; // Return for downstream handling if needed
+      const response = await getUserProfile();
+      setUser(response.data);
     } catch (error) {
-      console.error('Login failed:', error); // Debug
-      throw error; // Re-throw to be caught in Auth.jsx
+      console.error('Fetch User Error:', error);
+      logout();
     }
   };
 
-  const register = async (data) => {
-    await registerUser(data);
-    // Optionally auto-login after registration
+  const login = async (credentials) => {
+    const response = await loginUser(credentials);
+    const { token, user } = response.data;
+    localStorage.setItem('token', token);
+    setToken(token);
+    setUser(user);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    setToken(null);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, setPendingCartItem, pendingCartItem }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => React.useContext(AuthContext);
