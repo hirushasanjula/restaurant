@@ -34,7 +34,14 @@ const Navbar = () => {
     return location.pathname === path;
   };
 
-  if (!user && !logout) return null;
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+    if (!isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  };
 
   return (
     <nav
@@ -44,6 +51,7 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
+          {/* Logo - Visible on all screens */}
           <Link
             to="/"
             className={`font-bold text-2xl flex items-center ${
@@ -56,7 +64,7 @@ const Navbar = () => {
             <span className="hidden sm:block">Culinary</span>
           </Link>
           
-            {/* Desktop Menu Links */}
+          {/* Desktop Menu Links */}
           <div className="hidden md:flex items-center space-x-1">
             <NavLink to="/" text="Home" icon={<Home size={18} />} isActive={isActive('/')} scrolled={scrolled} />
             <NavLink to="/menu" text="Menu" icon={<ShoppingBag size={18} />} isActive={isActive('/menu')} scrolled={scrolled} />
@@ -140,22 +148,42 @@ const Navbar = () => {
             )}
           </div>
 
-            {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-2">
-            <Link to="/cart" className="relative mr-2">
-              <ShoppingCart size={22} className={scrolled ? 'text-amber-800' : 'text-white'} />
-              {cartItemCount > 0 && (
-                <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {cartItemCount > 9 ? '9+' : cartItemCount}
-                </div>
-              )}
-            </Link>
+          {/* Mobile Menu Top Bar - Always visible on mobile */}
+          <div className="md:hidden flex items-center">
+            {/* Always visible navigation icons on mobile */}
+            <div className="flex items-center space-x-4 mr-4">
+              <Link to="/" className={`${isActive('/') ? 'opacity-100' : 'opacity-70'} ${scrolled ? 'text-amber-800' : 'text-white'}`}>
+                <Home size={22} />
+              </Link>
+              <Link to="/menu" className={`${isActive('/menu') ? 'opacity-100' : 'opacity-70'} ${scrolled ? 'text-amber-800' : 'text-white'}`}>
+                <ShoppingBag size={22} />
+              </Link>
+              <Link to="/cart" className="relative">
+                <ShoppingCart size={22} className={`${isActive('/cart') ? 'opacity-100' : 'opacity-70'} ${scrolled ? 'text-amber-800' : 'text-white'}`} />
+                {cartItemCount > 0 && (
+                  <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {cartItemCount > 9 ? '9+' : cartItemCount}
+                  </div>
+                )}
+              </Link>
+            </div>
 
+            {/* Username display on mobile (condensed) */}
+            {user && (
+              <div className="mr-3">
+                <div className={`w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-white ${scrolled ? 'border-2 border-amber-800' : 'border-2 border-white'}`}>
+                  {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                </div>
+              </div>
+            )}
+
+            {/* Hamburger Menu Button */}
             <button
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={toggleMenu}
               className={`${
                 scrolled ? 'text-amber-800' : 'text-white'
               } hover:opacity-75 transition-opacity duration-300`}
+              aria-label={isOpen ? "Close menu" : "Open menu"}
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -163,65 +191,127 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* Mobile Menu Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={toggleMenu}
+        ></div>
+      )}
+
+      {/* Mobile Menu Drawer */}
       <div
-        className={`fixed inset-0 z-40 bg-amber-900/95 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 right-0 z-50 w-4/5 max-w-sm bg-amber-900 transform transition-transform duration-300 overflow-y-auto ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         } md:hidden`}
       >
-        <div className="flex flex-col h-full p-8 pt-24">
-          <MobileNavLink to="/" text="Home" icon={<Home size={20} />} />
-          <MobileNavLink to="/menu" text="Menu" icon={<ShoppingBag size={20} />} />
-          <MobileNavLink to="/order" text="Order Now" icon={<ShoppingBag size={20} />} />
-          <MobileNavLink to="/reservation" text="Make Reservation" icon={<Calendar size={20} />} />
+        {/* Mobile Menu Header with Close Button */}
+        <div className="flex justify-between items-center p-4 border-b border-amber-800">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-white shadow-lg">
+              <span>C</span>
+            </div>
+            <span className="text-white text-xl font-bold">Culinary</span>
+          </div>
+          <button 
+            onClick={toggleMenu}
+            className="text-white hover:text-amber-300"
+            aria-label="Close menu"
+          >
+            <X size={28} />
+          </button>
+        </div>
 
-          <MobileNavLink
-            to="/cart"
-            text={`Shopping Cart ${cartItemCount > 0 ? `(${cartItemCount})` : ''}`}
-            icon={<ShoppingCart size={20} />}
-          />
+        {/* User Profile Section - Prominently displayed at the top */}
+        {user && (
+          <div className="p-4 bg-amber-800 border-b border-amber-700">
+            <div className="flex items-center gap-3">
+              <div className="w-14 h-14 rounded-full bg-amber-600 flex items-center justify-center text-white text-xl font-bold shadow-md">
+                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <div>
+                <p className="text-white text-lg font-medium">{user.name || 'User'}</p>
+                <p className="text-amber-300 text-sm">{user.email}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
-          <div className="mt-auto">
-            <div className="h-px bg-amber-700 mb-6"></div>
-            {user ? (
-              <>
-                <div className="text-white flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-full bg-amber-700 flex items-center justify-center text-white text-xl font-bold">
-                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                  </div>
-                  <div>
-                    <p className="text-lg font-medium">{user.name || 'User'}</p>
-                    <p className="text-amber-300 text-sm">{user.email}</p>
-                  </div>
+        {/* Mobile Menu Links - Higher emphasis on core navigation items */}
+        <div className="p-4">
+          {/* Home, Menu, and Cart with emphasized styling */}
+          <div className="grid grid-cols-3 gap-2 mb-6">
+            <Link
+              to="/"
+              onClick={toggleMenu}
+              className={`flex flex-col items-center justify-center p-3 rounded-lg ${
+                isActive('/') ? 'bg-amber-800' : 'hover:bg-amber-800'
+              } transition-colors`}
+            >
+              <Home size={28} className="text-white mb-1" />
+              <span className="text-white text-sm font-medium">Home</span>
+            </Link>
+            
+            <Link
+              to="/menu"
+              onClick={toggleMenu}
+              className={`flex flex-col items-center justify-center p-3 rounded-lg ${
+                isActive('/menu') ? 'bg-amber-800' : 'hover:bg-amber-800'
+              } transition-colors`}
+            >
+              <ShoppingBag size={28} className="text-white mb-1" />
+              <span className="text-white text-sm font-medium">Menu</span>
+            </Link>
+            
+            <Link
+              to="/cart"
+              onClick={toggleMenu}
+              className={`flex flex-col items-center justify-center p-3 rounded-lg ${
+                isActive('/cart') ? 'bg-amber-800' : 'hover:bg-amber-800'
+              } transition-colors relative`}
+            >
+              <ShoppingCart size={28} className="text-white mb-1" />
+              <span className="text-white text-sm font-medium">Cart</span>
+              {cartItemCount > 0 && (
+                <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartItemCount > 9 ? '9+' : cartItemCount}
                 </div>
-                {user.role === 'admin' && (
-                  <>
-                    <Link
-                      to="/admin/menu"
-                      className="flex items-center gap-3 px-4 py-3 text-white hover:bg-amber-800 rounded-lg mb-4 transition-colors"
-                    >
-                      <Settings size={20} />
-                      Admin Panel
-                    </Link>
-                    <Link
-                      to="/admin/orders"
-                      className="flex items-center gap-3 px-4 py-3 text-white hover:bg-amber-800 rounded-lg mb-4 transition-colors"
-                    >
-                      <Settings size={20} />
-                      Orders
-                    </Link>
-                  </>
-                )}
-                <button
-                  onClick={logout}
-                  className="flex items-center gap-3 w-full px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                >
-                  <LogOut size={20} />
-                  Logout
-                </button>
-              </>
+              )}
+            </Link>
+          </div>
+
+          {/* Other navigation links */}
+          <div className="border-t border-amber-800 pt-4">
+            <MobileNavLink to="/order" text="Order Now" icon={<ShoppingBag size={20} />} onClick={toggleMenu} />
+            <MobileNavLink to="/reservation" text="Make Reservation" icon={<Calendar size={20} />} onClick={toggleMenu} />
+            <MobileNavLink to="/account" text="My Account" icon={<User size={20} />} onClick={toggleMenu} />
+          
+            {user && user.role === 'admin' && (
+              <div className="border-t border-amber-800 mt-4 pt-4">
+                <h3 className="text-amber-300 px-4 mb-2 text-sm font-medium">ADMIN CONTROLS</h3>
+                <MobileNavLink to="/admin/menu" text="Admin Panel" icon={<Settings size={20} />} onClick={toggleMenu} />
+                <MobileNavLink to="/admin/orders" text="Orders" icon={<Settings size={20} />} onClick={toggleMenu} />
+              </div>
+            )}
+          </div>
+
+          {/* Authentication buttons */}
+          <div className="mt-6 pt-4 border-t border-amber-800">
+            {user ? (
+              <button
+                onClick={() => {
+                  logout();
+                  toggleMenu();
+                }}
+                className="flex items-center justify-center gap-3 w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                <LogOut size={20} />
+                Logout
+              </button>
             ) : (
               <Link
                 to="/auth"
+                onClick={toggleMenu}
                 className="flex items-center justify-center gap-2 w-full py-3 bg-white text-amber-800 rounded-lg font-medium hover:bg-amber-100 transition-colors"
               >
                 <User size={20} />
@@ -253,10 +343,11 @@ const NavLink = ({ to, text, icon, isActive, scrolled }) => (
   </Link>
 );
 
-const MobileNavLink = ({ to, text, icon }) => (
+const MobileNavLink = ({ to, text, icon, onClick }) => (
   <Link
     to={to}
-    className="flex items-center gap-3 px-4 py-4 text-white text-lg hover:bg-amber-800 rounded-lg mb-2 transition-colors"
+    onClick={onClick}
+    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-amber-800 rounded-lg mb-2 transition-colors"
   >
     {icon}
     {text}
