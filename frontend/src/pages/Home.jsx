@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ChevronRight, Utensils, Calendar, ShoppingBag, Clock, Star, Coffee } from 'lucide-react';
 
+
 const Home = () => {
   const { user } = useAuth();
   
@@ -53,7 +54,7 @@ const Home = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-amber-900 to-amber-700 opacity-90"></div>
         <div 
           className="absolute inset-0 bg-cover bg-center bg-fixed"
-          style={{ backgroundImage: "url('/hero-image.jpg')", zIndex: "-1" }}
+          style={{ backgroundImage: "url('/hero-image.jpg')", zIndex: "0" }}
         ></div>
         <div className="max-w-7xl mx-auto h-full flex items-center px-4 sm:px-6 relative z-10">
           <div className="text-white w-full">
@@ -152,7 +153,7 @@ const Home = () => {
             <div className="w-full md:w-1/2">
               <div className="relative">
                 <img 
-                  src="/chef-special.jpg" 
+                  src="/chef.jpg" 
                   alt="Chef's Special Dish" 
                   className="rounded-lg shadow-xl object-cover w-full h-64 sm:h-80 md:h-96"
                 />
