@@ -68,8 +68,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-1">
             <NavLink to="/" text="Home" icon={<Home size={18} />} isActive={isActive('/')} scrolled={scrolled} />
             <NavLink to="/menu" text="Menu" icon={<ShoppingBag size={18} />} isActive={isActive('/menu')} scrolled={scrolled} />
-            <NavLink to="/order" text="Order" icon={<ShoppingBag size={18} />} isActive={isActive('/order')} scrolled={scrolled} />
-            <NavLink to="/reservation" text="Reservation" icon={<Calendar size={18} />} isActive={isActive('/reservation')} scrolled={scrolled} />
+            
 
             <Link
               to="/cart"
@@ -283,14 +282,12 @@ const Navbar = () => {
           {/* Other navigation links */}
           <div className="border-t border-amber-800 pt-4">
             <MobileNavLink to="/order" text="Order Now" icon={<ShoppingBag size={20} />} onClick={toggleMenu} />
-            <MobileNavLink to="/reservation" text="Make Reservation" icon={<Calendar size={20} />} onClick={toggleMenu} />
             <MobileNavLink to="/account" text="My Account" icon={<User size={20} />} onClick={toggleMenu} />
           
             {user && user.role === 'admin' && (
               <div className="border-t border-amber-800 mt-4 pt-4">
                 <h3 className="text-amber-300 px-4 mb-2 text-sm font-medium">ADMIN CONTROLS</h3>
                 <MobileNavLink to="/admin/menu" text="Admin Panel" icon={<Settings size={20} />} onClick={toggleMenu} />
-                <MobileNavLink to="/admin/orders" text="Orders" icon={<Settings size={20} />} onClick={toggleMenu} />
               </div>
             )}
           </div>

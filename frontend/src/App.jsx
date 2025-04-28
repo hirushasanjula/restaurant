@@ -3,8 +3,6 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Menu from './pages/Menu';
-import Order from './pages/Order';
-import Reservation from './pages/Reservation';
 import Auth from './pages/Auth'; 
 import Admin from './pages/Admin'; 
 import AdminMenuList from './components/AdminMenuList';
@@ -31,8 +29,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/menu" element={<Menu />} />
-              <Route path="/order" element={<Order />} />
-              <Route path="/reservation" element={<Reservation />} />
+
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin/menu" element={<AdminMenuList />} />
